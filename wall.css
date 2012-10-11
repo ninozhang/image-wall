@@ -1,0 +1,10 @@
+.image {
+    position: absolute;
+    width: 240px;
+    height: 150px;
+}
+
+.holding {
+    width: 360px;
+    height: 225px;
+}
