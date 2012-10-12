@@ -21,7 +21,11 @@
 <!-- <div style="background:url(img/photo-6.jpg)" class="image"></div> -->
 <script>
 $('.image').on("contextmenu", function(e){ return false; }).each(function() {
-    
+    var $this = $(this);
+    $this.css({
+        'top': Math.random() * 450,
+        'left': Math.random() * 600
+    });
 });
 </script>
 </body>

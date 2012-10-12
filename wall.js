@@ -66,30 +66,38 @@ function onRotating(event) {
         if (tramsform === 'none') {
             originAngle = 0;
         } else {
-            originAngle = tramsform.replace('rotate(', '').replace('deg)', '');
+            originAngle = extractDegree(tramsform);
         }
         $target.data('angle', originAngle);
     }
     originAngle = Number(originAngle);
     css = {
+        '-webkit-transform-origin': 'center center',
         '-webkit-transform': 'rotate(' + (originAngle + angle - initAngle) + 'deg)'
     };
-    console.log(initAngle + ',' + angle);
-    console.log(originAngle);
-    console.log('tramsform:' + tramsform);
+    console.log('originAngle:' + originAngle + '  rotate(' + extractDegree(tramsform) + 'deg)');
     $target.css(css);
 }
 
 function onRotate(event) {
+    var $target = $(event.target),
+        direction = event.direction,
+        tramsform = $target.css('-webkit-transform'),
+        angle = extractDegree(tramsform);
+    $target.data('angle', angle);
+}
 
+function extractDegree(rotate) {
+    var deg = rotate.replace('rotate(', '').replace('deg)', '');
+    return Number(deg);
 }
 
 events = {
-    'dragging .image': onDragging,
-    'hold .image': onHold,
+    // 'dragging .image': onDragging,
+    // 'hold .image': onHold,
     'pinching .image': onPinching,
     'pinch .image': onPinch,
-    // 'rotating .image': onRotating,
-    // 'rotate .image': onRotate
+    'rotating .image': onRotating,
+    'rotate .image': onRotate
 };
 touch.on(events);
