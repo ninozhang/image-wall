@@ -2,99 +2,102 @@ var touch = new Touch(),
     events;
 function onDragging(event) {
     var $target = $(event.target),
+        transform = getTransform($target),
+        regExp = /(.*)(px)(,)(.*)(px)/ig,
+        result = regExp.exec(transform.translate),
+        top = result && result[4] ? Number(result[4]) : 0,
+        left = result && result[1] ? Number(result[1]) : 0;
+    transform.translate = (left + event.deltaX) + 'px,' + (top + event.deltaY) + 'px';
+    setTransform($target, transform);
+}
+
+function onDrag(event) {
+    var $target = $(event.target),
         offset = $target.offset();
-    if (offset) {
-        $target.css({
-            top: offset.top + event.deltaY,
-            left: offset.left + event.deltaX
-        });
-        // $target.css('-webkit-transform', 'translate(' + event.deltaX + 'px, ' + event.deltaY+ 'px)');
-    }
 }
 
 function onHold(event) {
-    var $target = $(event.target),
-        current = event.current,
-        x = current[0].x,
-        y = current[0].y;
+    var $target = $(event.target);
     $target.addClass('holding');
 }
 
 function onPinching(event) {
     var $target = $(event.target),
+        transform = getTransform($target),
         scale = event.scale,
-        offset = $target.offset(),
-        originWidth = $target.data('width'),
-        originHeight = $target.data('height'),
-        currentWidth = $target.width(),
-        currentHeight = $target.height(),
-        width, height,
-        deltaX, deltaY;
-    if (!originWidth || !originHeight) {
-        originWidth = currentWidth;
-        originHeight = currentHeight;
-        $target.data('width', originWidth).data('height', originHeight);
-    }
-    width = originWidth * scale;
-    height = originHeight * scale;
-    deltaX = (currentWidth - width) / 2;
-    deltaY = (currentHeight - height) / 2;
-    $target.width(width).height(height).css({
-        top: offset.top + deltaY,
-        left: offset.left + deltaX
-    });
-    // var $target = $(event.target),
-        // scale = event.scale;
-    // $target.css('-webkit-transform', 'scale(' + scale + ', ' + scale + ')');
+        originScale = $target.data('scale') || 1;
+    transform.scale = originScale * scale;
+    setTransform($target, transform);
 }
 
 function onPinch(event) {
     var $target = $(event.target),
-        width = $target.width(),
-        height = $target.height();
-    $target.data('width', width).data('height', height);
+        transform = getTransform($target),
+        scale = transform.scale;
+    $target.data('scale', scale);
 }
 
 function onRotating(event) {
     var $target = $(event.target),
-        tramsform = $target.css('-webkit-transform'),
-        originAngle = $target.data('angle'),
-        initAngle = event.initAngle,
-        angle = event.angle,
-        css;
-    if (isNaN(originAngle)) {
-        if (tramsform === 'none') {
-            originAngle = 0;
-        } else {
-            originAngle = extractDegree(tramsform);
-        }
-        $target.data('angle', originAngle);
-    }
-    originAngle = Number(originAngle);
-    css = {
-        '-webkit-transform-origin': 'center center',
-        '-webkit-transform': 'rotate(' + (originAngle + angle - initAngle) + 'deg)'
-    };
-    console.log('originAngle:' + originAngle + '  rotate(' + extractDegree(tramsform) + 'deg)');
-    $target.css(css);
+        transform = getTransform($target),
+        delta = event.delta,
+        angle = extractDegree(transform.rotate);
+    transform.rotate = (angle + delta) + 'deg';
+    setTransform($target, transform);
 }
 
 function onRotate(event) {
     var $target = $(event.target),
-        direction = event.direction,
-        tramsform = $target.css('-webkit-transform'),
-        angle = extractDegree(tramsform);
-    $target.data('angle', angle);
+        transform = getTransform($target),
+        rotate = transform.rotate;
+    $target.data('rotate', rotate);
 }
 
 function extractDegree(rotate) {
-    var deg = rotate.replace('rotate(', '').replace('deg)', '');
-    return Number(deg);
+    if (rotate.indexOf('deg')) {
+        return Number(rotate.replace('deg', ''));
+    }
+    return 0;
+}
+
+function getTransform(target) {
+    var $target = $(target),
+        transformString = $target.css('-webkit-transform'),
+        transformArray = transformString.split(')'),
+        transform = {
+            translate: '0,0',
+            scale: 1,
+            rotate: 0
+        },
+        result, prop, value;
+    if (transformString === 'none') {
+        return transform;
+    }
+    for (var i = 0; i < transformArray.length; i++) {
+        result = transformArray[i].split('(');
+        prop = result[0].trim();
+        value = result[1];
+        if (prop) {
+            transform[prop] = value;
+        }
+    }console.log('get:' + JSON.stringify(transform));
+    return transform;
+}
+
+function setTransform(target, transform) {
+    var $target = $(target),
+        transformString = '';
+    for (var name in transform) {
+        transformString += name + '(' + transform[name] + ')';
+    }console.log('set:' + transformString);
+    $target.css('-webkit-transform', transformString);
+    return transformString;
 }
 
 events = {
-    // 'dragging .image': onDragging,
-    // 'hold .image': onHold,
+    'dragging .image': onDragging,
+    'drag .image': onDrag,
+    'hold .image': onHold,
     'pinching .image': onPinching,
     'pinch .image': onPinch,
     'rotating .image': onRotating,
