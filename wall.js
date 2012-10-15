@@ -1,7 +1,8 @@
 var touch = new Touch(),
     events;
+
 function onDragging(event) {
-    var $target = $(event.target),
+    var $target = $(event.currentTarget),
         transform = getTransform($target),
         regExp = /(.*)(px)(,)(.*)(px)/ig,
         result = regExp.exec(transform.translate),
@@ -12,33 +13,33 @@ function onDragging(event) {
 }
 
 function onDrag(event) {
-    var $target = $(event.target),
+    var $target = $(event.currentTarget),
         offset = $target.offset();
 }
 
 function onHold(event) {
-    var $target = $(event.target);
+    var $target = $(event.currentTarget);
     $target.addClass('holding');
 }
 
 function onPinching(event) {
-    var $target = $(event.target),
+    var $target = $(event.currentTarget),
         transform = getTransform($target),
         scale = event.scale,
         originScale = $target.data('scale') || 1;
-    transform.scale = originScale * scale;
+    transform.scale = originScale * scale;console.log(transform.scale);
     setTransform($target, transform);
 }
 
 function onPinch(event) {
-    var $target = $(event.target),
+    var $target = $(event.currentTarget),
         transform = getTransform($target),
         scale = transform.scale;
     $target.data('scale', scale);
 }
 
 function onRotating(event) {
-    var $target = $(event.target),
+    var $target = $(event.currentTarget),
         transform = getTransform($target),
         delta = event.delta,
         angle = extractDegree(transform.rotate);
@@ -47,7 +48,7 @@ function onRotating(event) {
 }
 
 function onRotate(event) {
-    var $target = $(event.target),
+    var $target = $(event.currentTarget),
         transform = getTransform($target),
         rotate = transform.rotate;
     $target.data('rotate', rotate);
@@ -80,7 +81,7 @@ function getTransform(target) {
         if (prop) {
             transform[prop] = value;
         }
-    }console.log('get:' + JSON.stringify(transform));
+    }
     return transform;
 }
 
@@ -89,18 +90,18 @@ function setTransform(target, transform) {
         transformString = '';
     for (var name in transform) {
         transformString += name + '(' + transform[name] + ')';
-    }console.log('set:' + transformString);
+    }
     $target.css('-webkit-transform', transformString);
     return transformString;
 }
 
 events = {
-    'dragging .image': onDragging,
-    'drag .image': onDrag,
-    'hold .image': onHold,
-    'pinching .image': onPinching,
-    'pinch .image': onPinch,
-    'rotating .image': onRotating,
-    'rotate .image': onRotate
+    'dragging .photo': onDragging,
+    'drag .photo': onDrag,
+    'hold .photo': onHold,
+    'pinching .photo': onPinching,
+    'pinch .photo': onPinch,
+    'rotating .photo': onRotating,
+    'rotate .photo': onRotate
 };
 touch.on(events);
