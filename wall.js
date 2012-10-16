@@ -1,4 +1,4 @@
-var touch = new Touch(),
+var gesture = new Gesture(),
     events;
 
 function onDragging(event) {
@@ -104,4 +104,4 @@ events = {
     'rotating .photo': onRotating,
     'rotate .photo': onRotate
 };
-touch.on(events);
+gesture.on(events);
